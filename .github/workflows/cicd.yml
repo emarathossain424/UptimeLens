@@ -1,0 +1,40 @@
+name: Ci-CD Pipeline
+
+on: push
+
+jobs:
+  setup-laravel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Php
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, curl, zip, bcmath, gd, fileinfo, json, openssl
+          ini-values: post_max_size=256M, upload_max_filesize=256M
+
+      - name: Install Composer Dependencies
+        run: |
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+          composer dump-autoload --optimize
+
+      - name: Copy Environment File + Generate Key + Cache Config
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan config:cache
+
+      - name: Setup Mysql
+        uses: mysql-actions/setup-mysql@v1
+        with:
+          mysql-version: '8.0'
+          mysql-root-password: root
+          mysql-root-user: developer
+          mysql-database: uptime_lens
+
+      - name: Run Migrations
+        run: |
+          php artisan migrate

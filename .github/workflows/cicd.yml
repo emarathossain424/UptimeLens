@@ -41,8 +41,8 @@ jobs:
         uses: mirromutth/mysql-action@v1.1
         with:
           mysql version: '8.0'
-          mysql root password: root
-          mysql root user: developer
+          mysql user: admin
+          mysql password: 123456
           mysql database: uptime_lens
 
       - name: Run Migrations # Step to run database migrations
@@ -82,8 +82,8 @@ jobs:
         uses: mirromutth/mysql-action@v1.1
         with:
           mysql version: '8.0'
-          mysql root password: root
-          mysql root user: developer
+          mysql user: admin
+          mysql password: 123456
           mysql database: uptime_lens
 
       - name: Generate Key + Cache Config # Step to generate application key, and cache configuration

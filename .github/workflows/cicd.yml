@@ -62,6 +62,12 @@ jobs:
         with:
           name: laravel-env-vendor-composer-lock
 
+      - name: Move downloaded files to correct location
+        run: |
+          mv .env $GITHUB_WORKSPACE/.env
+          mv -v vendor $GITHUB_WORKSPACE/vendor
+          mv -v composer.lock $GITHUB_WORKSPACE/composer.lock
+
       - name: Setup Php
         uses: shivammathur/setup-php@v2
         with:

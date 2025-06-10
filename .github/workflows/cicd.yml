@@ -85,7 +85,7 @@ jobs:
 
       - name: Run tests
         run: |
-          php artisan test --env=testing --no-interaction --parallel
+          php artisan test --env=testing
 
 
 

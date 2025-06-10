@@ -77,6 +77,11 @@ jobs:
           mysql root user: developer
           mysql database: uptime_lens
 
+      - name: Generate Key + Cache Config # Step to generate application key, and cache configuration
+        run: |
+          php artisan key:generate
+          php artisan config:cache
+
       - name: Run Migrations # Step to run database migrations
         env:
           APP_ENV: testing

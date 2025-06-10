@@ -33,7 +33,7 @@ jobs:
           name: laravel-env-vendor-composer-lock
           paths: |
             .env
-            vendor
+            vendor/
             composer.lock
 
       - name: Setup Mysql # Step to set up MySQL database

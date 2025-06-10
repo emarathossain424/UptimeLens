@@ -35,6 +35,7 @@ jobs:
             .env
             vendor/
             composer.lock
+          include-hidden-files: true
 
       - name: Setup Mysql # Step to set up MySQL database
         uses: mirromutth/mysql-action@v1.1

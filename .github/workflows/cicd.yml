@@ -61,12 +61,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: laravel-env-vendor-composer-lock
+          path: downloaded-artifacts
 
-      - name: Move downloaded files to correct location
+      - name: Move downloaded files to project root
         run: |
-          mv .env $GITHUB_WORKSPACE/.env
-          mv -v vendor $GITHUB_WORKSPACE/vendor
-          mv -v composer.lock $GITHUB_WORKSPACE/composer.lock
+          mv downloaded-artifacts/.env .env
+          mv downloaded-artifacts/vendor ./vendor
+          mv downloaded-artifacts/composer.lock composer.lock
+
 
       - name: Setup Php
         uses: shivammathur/setup-php@v2

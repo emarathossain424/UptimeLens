@@ -35,7 +35,7 @@ jobs:
             .env
             vendor/
             composer.lock
-          include-hidden-files: true
+          include-hidden-files: true # Include hidden files like (.env) in the upload
 
       - name: Setup Mysql # Step to set up MySQL database
         uses: mirromutth/mysql-action@v1.1

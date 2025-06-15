@@ -2,6 +2,7 @@
 
 namespace Modules\Auth\Controllers;
 
+use App\Facades\ApiResponse;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\Request;
@@ -20,7 +21,6 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|unique:users',
@@ -28,12 +28,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed.',
-                'data'    => null,
-                'errors'  => $validator->errors(),
-            ], 422);
+            return ApiResponse::error('Validation failed.', $validator->errors(), 422);
         }
 
         try {
@@ -44,61 +39,77 @@ class AuthController extends Controller
                 'password'          => Hash::make($request->password),
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful !',
-                'data'    => [
-                    'id'    => $user->id,
-                    'name'  => $user->name,
-                    'email' => $user->email,
-                ],
-                'errors'  => null,
-            ], 201);
+            return ApiResponse::success('Registration successful!', [
+                'id'    => $user->id,
+                'name'  => $user->name,
+                'email' => $user->email,
+            ]);
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unable to process the request.',
-                'data'    => null,
-                'errors'  => [
-                    'details' => [
-                        $e->getMessage(),
-                    ],
-                ],
+            return ApiResponse::error('Unable to process the request.', [
+                'details' => [$e->getMessage()],
             ], 422);
         }
     }
 
-    // Login (Issue Token)
+    /** Login a user
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function login(Request $request)
     {
-        $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
+        $validator = Validator::make($request->all(), [
+            'email'    => 'required|string|email',
+            'password' => 'required|string|min:6',
         ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+        if ($validator->fails()) {
+            return ApiResponse::error('Validation failed.', $validator->errors(), 422);
         }
 
-        $token = $user->createToken('api-token')->plainTextToken;
+        try {
+            $user = User::where('email', $request->email)->first();
 
-        return response()->json([
-            'message' => 'Login successful!',
-            'token'   => $token,
-        ]);
+            // Check if user exists and password is correct
+            if (! $user || ! Hash::check($request->password, $user->password)) {
+                return ApiResponse::error('Invalid credentials.', [
+                    'details' => ['The provided credentials are incorrect.'],
+                ], 401);
+            }
+
+            $token = $user->createToken('api-token')->plainTextToken;
+
+            // return $user;
+
+            return ApiResponse::success('Login successful!', [
+                'token' => $token,
+                'user'  => [
+                    'id'    => $user->id,
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                ],
+            ]);
+        } catch (Exception $e) {
+            return ApiResponse::error('Unable to process the request.', [
+                'details' => ['An error occurred while logging in. Please try again later.'],
+            ], 422);
+        }
     }
 
-    // Logout (Revoke Token)
+    /**
+     * Logout the authenticated user
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'Logged out successfully!',
-        ]);
+        try {
+            $request->user()->currentAccessToken()->delete();
+            return ApiResponse::success('Logout successful!', []);
+        } catch (Exception $e) {
+            return ApiResponse::error('Unable to process the request.', [
+                'details' => ['An error occurred while logging out. Please try again later.'],
+            ], 422);
+        }
     }
 }

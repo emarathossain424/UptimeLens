@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Controllers\AuthController;
 
-Route::get('/auth', [AuthController::class, 'register']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);

@@ -28,20 +28,22 @@ class ModuleServiceProvider extends ServiceProvider
         foreach ($directories as $modulePath) {
             $configPath = $modulePath . '/module.json';
 
-            if (!File::exists($configPath)) {
+            if (! File::exists($configPath)) {
                 continue;
             }
 
             $config = json_decode(File::get($configPath), true);
 
-            if (!($config['enabled'] ?? false)) {
+            if (! ($config['enabled'] ?? false)) {
                 continue;
             }
 
             // Load routes
-            $routePath = $modulePath . '/Routes/web.php';
+            $routePath = $modulePath . '/Routes/api.php';
             if (File::exists($routePath)) {
-                Route::middleware(['web'])
+
+                Route::middleware(['api'])
+                    ->prefix('api')
                     ->group($routePath);
             }
         }
